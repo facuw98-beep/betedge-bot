@@ -1,3 +1,4 @@
+
 import requests
 import os
 import time
@@ -525,11 +526,21 @@ def daily_run():
 
 # ─── MAIN ─────────────────────────────────────────────────────
 if __name__ == "__main__":
-    mode = os.environ.get("BOT_MODE", "daily")
+    import threading
 
-    if mode == "listen":
-        # Modo conversacional continuo
-        listen_mode()
+    if not ODDS_API_KEY:
+        send_telegram("⚠️ Falta la ODDS_API_KEY en las variables de Railway.")
     else:
-        # Modo análisis diario (cron)
-        daily_run()
+        print(f"[{datetime.now()}] Bot arrancando...")
+
+        # Correr el analisis diario en un thread separado
+        def run_daily():
+            daily_run()
+
+        daily_thread = threading.Thread(target=run_daily, daemon=True)
+        daily_thread.start()
+        daily_thread.join()  # esperar que termine el analisis diario
+
+        # Despues quedarse escuchando mensajes
+        print(f"[{datetime.now()}] Activando modo escucha...")
+        listen_mode()
