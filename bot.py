@@ -1,3 +1,4 @@
+
 import requests
 import json
 import os
@@ -11,7 +12,10 @@ ODDS_API_KEY = os.environ.get("ODDS_API_KEY", "")
 
 # Configuración del análisis
 TOP_BETS = 3                # Solo las 3 mejores apuestas del día
-MIN_VALUE = 0.03            # Mínimo 3% de value
+MIN_VALUE = 0.03            # Mínimo 3% de value POSITIVO
+MIN_PROB = 0.25             # Probabilidad real mínima 25% (descarta perdedores claros)
+MAX_ODDS = 4.50             # Cuota máxima aceptable (nada de apuestas al perdedor)
+MIN_KELLY = 0.005           # Kelly mínimo (descarta apuestas sin ventaja real)
 QUARTER_KELLY = 0.25        # Fracción de Kelly conservadora
 EJEMPLO_APUESTA = 10000     # Monto de ejemplo para mostrar ganancia potencial (en ARS)
 
@@ -183,7 +187,10 @@ def analyze_games(games: list, sport: dict) -> list:
             # Score compuesto para ranking
             score = (value * 0.6) + (odds_edge * 0.4)
 
-            if value >= MIN_VALUE or odds_edge >= 0.02:
+            if (value >= MIN_VALUE and
+                    fair_prob >= MIN_PROB and
+                    analysis_price <= MAX_ODDS and
+                    kelly_q >= MIN_KELLY):
                 # Fecha del partido
                 try:
                     dt = datetime.fromisoformat(commence.replace("Z", "+00:00"))
