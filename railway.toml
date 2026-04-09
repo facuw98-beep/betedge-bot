@@ -3,4 +3,4 @@ builder = "NIXPACKS"
 
 [deploy]
 startCommand = "python bot.py"
-cronSchedule = "0 8 * * *"
+restartPolicyType = "always"
